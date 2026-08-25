@@ -13,7 +13,8 @@ REFERENCE_RANGES = {
         }
     },
     "Resting Min (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}}
+        "Solid-State HRAM": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}},
+        "Water-Perfused": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}}
     },
     "Resting Mean (mmHg)": {
         "Solid-State HRAM": {
@@ -26,19 +27,24 @@ REFERENCE_RANGES = {
         }
     },
     "Resting 5th (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}}
+        "Solid-State HRAM": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}},
+        "Water-Perfused": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}}
     },
     "Resting Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}}
+        "Solid-State HRAM": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}},
+        "Water-Perfused": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}}
     },
     "Cough Box Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 150}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 180}}
+        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 150}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 180}},
+        "Water-Perfused": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 150}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 180}}
     },
     "Cough Box Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 50, "normal_min": 70, "normal_max": 200}, "Male": {"poor_low": 60, "normal_min": 80, "normal_max": 250}}
+        "Solid-State HRAM": {"Female": {"poor_low": 50, "normal_min": 70, "normal_max": 200}, "Male": {"poor_low": 60, "normal_min": 80, "normal_max": 250}},
+        "Water-Perfused": {"Female": {"poor_low": 50, "normal_min": 70, "normal_max": 200}, "Male": {"poor_low": 60, "normal_min": 80, "normal_max": 250}}
     },
     "Average Squeeze Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 200, "poor_high": 300}, "Male": {"poor_low": 60, "normal_min": 90, "normal_max": 250, "poor_high": 350}}
+        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 200, "poor_high": 300}, "Male": {"poor_low": 60, "normal_min": 90, "normal_max": 250, "poor_high": 350}},
+        "Water-Perfused": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 200, "poor_high": 300}, "Male": {"poor_low": 60, "normal_min": 90, "normal_max": 250, "poor_high": 350}}
     },
     "Squeeze Max (mmHg)": {
         "Solid-State HRAM": {
@@ -51,58 +57,76 @@ REFERENCE_RANGES = {
         }
     },
     "Squeeze Duration (sec)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}, "Male": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}}
+        "Solid-State HRAM": {"Female": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}, "Male": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}},
+        "Water-Perfused": {"Female": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}, "Male": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}}
     },
     "Endurance Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 180}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 200}}
+        "Solid-State HRAM": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 180}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 200}},
+        "Water-Perfused": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 180}, "Male": {"poor_low": 50, "normal_min": 70, "normal_max": 200}}
     },
     "Endurance Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 70, "normal_max": 250}, "Male": {"poor_low": 60, "normal_min": 100, "normal_max": 300}}
+        "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 70, "normal_max": 250}, "Male": {"poor_low": 60, "normal_min": 100, "normal_max": 300}},
+        "Water-Perfused": {"Female": {"poor_low": 40, "normal_min": 70, "normal_max": 250}, "Male": {"poor_low": 60, "normal_min": 100, "normal_max": 300}}
     },
     "Endurance Duration (sec)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 20, "normal_max": 60}, "Male": {"poor_low": 10, "normal_min": 20, "normal_max": 60}}
+        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 20, "normal_max": 60}, "Male": {"poor_low": 10, "normal_min": 20, "normal_max": 60}},
+        "Water-Perfused": {"Female": {"poor_low": 10, "normal_min": 20, "normal_max": 60}, "Male": {"poor_low": 10, "normal_min": 20, "normal_max": 60}}
     },
     "Push Resting Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 90, "poor_high": 120}, "Male": {"poor_low": 40, "normal_min": 60, "normal_max": 110, "poor_high": 140}}
+        "Solid-State HRAM": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 90, "poor_high": 120}, "Male": {"poor_low": 40, "normal_min": 60, "normal_max": 110, "poor_high": 140}},
+        "Water-Perfused": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 90, "poor_high": 120}, "Male": {"poor_low": 40, "normal_min": 60, "normal_max": 110, "poor_high": 140}}
     },
     "Rectal Resting Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 5, "normal_max": 25, "poor_high": 40}, "Male": {"normal_min": 5, "normal_max": 25, "poor_high": 40}}
+        "Solid-State HRAM": {"Female": {"normal_min": 5, "normal_max": 25, "poor_high": 40}, "Male": {"normal_min": 5, "normal_max": 25, "poor_high": 40}},
+        "Water-Perfused": {"Female": {"normal_min": 5, "normal_max": 25, "poor_high": 40}, "Male": {"normal_min": 5, "normal_max": 25, "poor_high": 40}}
     },
     "Push Residual Pressure (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}}
+        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}},
+        "Water-Perfused": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 45, "poor_high": 80}}
     },
     "Push Relaxation (%)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}}
+        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}},
+        "Water-Perfused": {"Female": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 0, "normal_min": 20, "normal_max": 100, "poor_high": 101}}
     },
     "Rectal Exp. Inc Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 30, "normal_max": 100}, "Male": {"poor_low": 15, "normal_min": 35, "normal_max": 100}}
+        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 30, "normal_max": 100}, "Male": {"poor_low": 15, "normal_min": 35, "normal_max": 100}},
+        "Water-Perfused": {"Female": {"poor_low": 10, "normal_min": 30, "normal_max": 100}, "Male": {"poor_low": 15, "normal_min": 35, "normal_max": 100}}
     },
     "Rectal Exp. Inc Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 15, "normal_min": 40, "normal_max": 150}, "Male": {"poor_low": 20, "normal_min": 45, "normal_max": 150}}
+        "Solid-State HRAM": {"Female": {"poor_low": 15, "normal_min": 40, "normal_max": 150}, "Male": {"poor_low": 20, "normal_min": 45, "normal_max": 150}},
+        "Water-Perfused": {"Female": {"poor_low": 15, "normal_min": 40, "normal_max": 150}, "Male": {"poor_low": 20, "normal_min": 45, "normal_max": 150}}
     },
     "RAIR Resting Min (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}}
+        "Solid-State HRAM": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}},
+        "Water-Perfused": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}}
     },
     "RAIR Resting Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 50, "normal_max": 90}, "Male": {"normal_min": 60, "normal_max": 110}}
+        "Solid-State HRAM": {"Female": {"normal_min": 50, "normal_max": 90}, "Male": {"normal_min": 60, "normal_max": 110}},
+        "Water-Perfused": {"Female": {"normal_min": 50, "normal_max": 90}, "Male": {"normal_min": 60, "normal_max": 110}}
     },
     "RAIR Resting 5th (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}}
+        "Solid-State HRAM": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}},
+        "Water-Perfused": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}}
     },
     "RAIR Resting Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}}
+        "Solid-State HRAM": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}},
+        "Water-Perfused": {"Female": {"normal_min": 60, "normal_max": 110}, "Male": {"normal_min": 70, "normal_max": 130}}
     },
     "RAIR Volume (ml)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}}
+        "Solid-State HRAM": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}},
+        "Water-Perfused": {"Female": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}, "Male": {"poor_low": 0, "normal_min": 10, "normal_max": 50, "poor_high": 80}}
     },
     "RAIR Residual (mmHg)": {
-        "Solid-State HRAM": {"Female": {"normal_min": 0, "normal_max": 40, "poor_high": 60}, "Male": {"normal_min": 0, "normal_max": 45, "poor_high": 65}}
+        "Solid-State HRAM": {"Female": {"normal_min": 0, "normal_max": 40, "poor_high": 60}, "Male": {"normal_min": 0, "normal_max": 45, "poor_high": 65}},
+        "Water-Perfused": {"Female": {"normal_min": 0, "normal_max": 40, "poor_high": 60}, "Male": {"normal_min": 0, "normal_max": 45, "poor_high": 65}}
     },
     "RAIR Relaxation (%)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}}
+        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}},
+        "Water-Perfused": {"Female": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}, "Male": {"poor_low": 10, "normal_min": 25, "normal_max": 100, "poor_high": 101}}
     },
     "RAIR Duration (sec)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}, "Male": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}}
+        "Solid-State HRAM": {"Female": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}, "Male": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}},
+        "Water-Perfused": {"Female": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}, "Male": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}}
     },
     "First Sensation (ml)": {
         "Solid-State HRAM": {
