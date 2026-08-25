@@ -190,7 +190,6 @@ def evaluate_value(field, val, sys, gen):
     if val is None:
         return ""
     
-    # Removed the absolute value logic here to natively process negative inputs
     check_val = val
 
     if field in REFERENCE_RANGES and sys in REFERENCE_RANGES[field]:
@@ -267,13 +266,24 @@ with tabs[4]:
         st.markdown("---")
         
         def get_val(field):
-            # Allows actual 0.0 to be returned instead of assuming None
             return st.session_state.inputs.get(field, None)
             
         def get_limits(field):
             if field in REFERENCE_RANGES and system in REFERENCE_RANGES[field]:
                 return REFERENCE_RANGES[field][system].get(gender, {})
             return {}
+
+        # 0. Anal Canal Length
+        acl_val = get_val("Average Anal Canal Length (cm)")
+        acl_limits = get_limits("Average Anal Canal Length (cm)")
+        
+        if acl_val is not None and acl_val != 0.0 and acl_limits:
+            if acl_val < acl_limits.get("normal_min", 2.3):
+                st.markdown("* **ANAL CANAL LENGTH:** Short.")
+            elif acl_val > acl_limits.get("normal_max", 5.1):
+                st.markdown("* **ANAL CANAL LENGTH:** Long.")
+            else:
+                st.markdown("* **ANAL CANAL LENGTH:** Normal.")
 
         # 1. Anal Tone & Contractility
         resting_mean = get_val("Resting Mean (mmHg)")
@@ -311,18 +321,18 @@ with tabs[4]:
         cough_limits = get_limits("Cough Box Max (mmHg)")
         if cough_max is not None and cough_limits:
             if cough_max < cough_limits.get("normal_min", 70):
-                st.markdown("* **COUGH REFLEX:** Reduced cough pressures, suggesting impaired reflex contraction. This is a potential mechanism for stress incontinence—does this correlate with the patient's symptoms?")
+                st.markdown("* **COUGH REFLEX:** Absent or impaired. Potential causes include direct sphincter injury or pudendal nerve neuropathy. *(Note: This reflex is typically preserved in spinal cord injuries except in cases of cauda equina lesions.)*")
             else:
-                st.markdown("* **COUGH REFLEX:** Normal reflex sphincter contraction upon simulated intra-abdominal pressure increase.")
+                st.markdown("* **COUGH REFLEX:** Present and functioning. Normal reflex sphincter contraction upon simulated intra-abdominal pressure increase.")
 
         # 4. RAIR
         rair_relax = get_val("RAIR Relaxation (%)")
         rair_limits = get_limits("RAIR Relaxation (%)")
         if rair_relax is not None and rair_limits:
             if rair_relax < 0:
-                st.markdown(f"* **RAIR:** Paradoxical contraction ({rair_relax}% relaxation).")
+                st.markdown(f"* **RAIR:** Paradoxical contraction ({rair_relax}% relaxation). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
             elif rair_relax < rair_limits.get("normal_min", 25):
-                st.markdown("* **RAIR:** Rectoanal areflexia (Reflex absent or blunted below normal threshold).")
+                st.markdown("* **RAIR:** Rectoanal areflexia (Reflex absent or blunted below normal threshold). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
             else:
                 st.markdown("* **RAIR:** Present and normal.")
                 
@@ -341,11 +351,11 @@ with tabs[4]:
                 if val < limits.get("normal_min", 0): sensory_low_count += 1
                 
         if sensory_high_count >= 2:
-            st.markdown("* **SENSATION:** Rectal hyposensitivity.")
+            st.markdown("* **SENSATION:** Rectal hyposensitivity. Suggestive of chronic constipation.")
         elif sensory_high_count == 1:
-            st.markdown("* **SENSATION:** Borderline rectal hyposensitivity.")
+            st.markdown("* **SENSATION:** Borderline rectal hyposensitivity. May be associated with chronic constipation.")
         elif sensory_low_count >= 1:
-            st.markdown("* **SENSATION:** Rectal hypersensitivity.")
+            st.markdown("* **SENSATION:** Rectal hypersensitivity. Potential associated conditions include urge faecal incontinence, radiation proctitis, ulcerative colitis, IBS-D, and Low Anterior Resection Syndrome (LARS).")
         else:
             if fcsv is not None and ddv is not None and mtv is not None:
                 st.markdown("* **SENSATION:** Normal thresholds for rectal sensation.")
@@ -359,24 +369,42 @@ with tabs[4]:
             rectal_inc = get_val("Rectal Exp. Inc Max (mmHg)")
             rectal_inc_limits = get_limits("Rectal Exp. Inc Max (mmHg)")
             
-            # Absolute value override removed here as well to respect negative inputs
             is_dyssynergic = push_relax is not None and push_relax_limits and push_relax < push_relax_limits.get("normal_min", 20)
             is_poor_propulsion = rectal_inc is not None and rectal_inc_limits and rectal_inc < rectal_inc_limits.get("normal_min", 40)
             
+            # Determine Dyssynergia Type (I-IV)
+            dyssynergia_type = ""
+            if push_relax is not None and rectal_inc is not None:
+                adequate_push = not is_poor_propulsion
+                paradoxical_contraction = push_relax < 0
+                incomplete_relaxation = 0 <= push_relax < push_relax_limits.get("normal_min", 20)
+                
+                if adequate_push and paradoxical_contraction:
+                    dyssynergia_type = " - **Type I Dyssynergia** (Adequate rectal push pressures with paradoxical anal contraction)"
+                elif not adequate_push and paradoxical_contraction:
+                    dyssynergia_type = " - **Type II Dyssynergia** (Inadequate rectal push pressures with paradoxical anal contraction)"
+                elif adequate_push and incomplete_relaxation:
+                    dyssynergia_type = " - **Type III Dyssynergia** (Adequate rectal push with absent/incomplete sphincter relaxation)"
+                elif not adequate_push and incomplete_relaxation:
+                    dyssynergia_type = " - **Type IV Dyssynergia** (Inadequate rectal push with absent/incomplete sphincter relaxation)"
+
             if bet == "Prolonged/Abnormal":
                 if is_dyssynergic and is_poor_propulsion:
-                    st.markdown("* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.")
+                    st.markdown(f"* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.{dyssynergia_type}")
                 elif is_dyssynergic:
-                    st.markdown("* **COORDINATION:** Abnormal expulsion with dyssynergia.")
+                    st.markdown(f"* **COORDINATION:** Abnormal expulsion with dyssynergia.{dyssynergia_type}")
                 elif is_poor_propulsion:
                     st.markdown("* **COORDINATION:** Abnormal expulsion with poor propulsion.")
                 else:
                     st.markdown("* **COORDINATION:** Abnormal expulsion with normal manometric pattern.")
             elif bet == "Normal":
                 if is_dyssynergic or is_poor_propulsion:
-                    st.markdown("* **COORDINATION:** Normal expulsion with abnormal manometric pattern.")
+                    st.markdown(f"* **COORDINATION:** Normal expulsion with abnormal manometric pattern.{dyssynergia_type}")
                 else:
                     st.markdown("* **COORDINATION:** Normal manometric pattern with normal expulsion.")
+            
+            if is_dyssynergic:
+                st.caption("*(Note: Up to 90% of healthy controls without defecation issues can exhibit dyssynergic manometric patterns during testing.)*")
 
 # --- REFERENCES TAB ---
 with tabs[5]:
