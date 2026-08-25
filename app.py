@@ -4,19 +4,26 @@ import streamlit as st
 REFERENCE_RANGES = {
     "Average Anal Canal Length (cm)": {
         "Solid-State HRAM": {
-            "Female": {"poor_low": 1.5, "normal_min": 2.3, "normal_max": 5.0, "poor_high": 6.0},
-            "Male":   {"poor_low": 2.0, "normal_min": 3.0, "normal_max": 5.5, "poor_high": 6.5}
+            "Female": {"normal_min": 2.3, "normal_max": 5.0},
+            "Male":   {"normal_min": 2.4, "normal_max": 5.1}
         },
         "Water-Perfused": {
-            "Female": {"poor_low": 1.5, "normal_min": 2.5, "normal_max": 4.0, "poor_high": 5.0},
-            "Male":   {"poor_low": 2.0, "normal_min": 3.0, "normal_max": 4.5, "poor_high": 5.5}
+            "Female": {"normal_min": 2.3, "normal_max": 5.0},
+            "Male":   {"normal_min": 2.4, "normal_max": 5.1}
         }
     },
     "Resting Min (mmHg)": {
         "Solid-State HRAM": {"Female": {"normal_min": 30, "normal_max": 80}, "Male": {"normal_min": 40, "normal_max": 100}}
     },
     "Resting Mean (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 30, "normal_min": 50, "normal_max": 90, "poor_high": 120}, "Male": {"poor_low": 40, "normal_min": 60, "normal_max": 110, "poor_high": 140}}
+        "Solid-State HRAM": {
+            "Female": {"normal_min": 33, "normal_max": 101}, 
+            "Male": {"normal_min": 38, "normal_max": 114}
+        },
+        "Water-Perfused": {
+            "Female": {"normal_min": 34, "normal_max": 101}, 
+            "Male": {"normal_min": 40, "normal_max": 116}
+        }
     },
     "Resting 5th (mmHg)": {
         "Solid-State HRAM": {"Female": {"normal_min": 40, "normal_max": 80}, "Male": {"normal_min": 50, "normal_max": 95}}
@@ -34,7 +41,14 @@ REFERENCE_RANGES = {
         "Solid-State HRAM": {"Female": {"poor_low": 40, "normal_min": 60, "normal_max": 200, "poor_high": 300}, "Male": {"poor_low": 60, "normal_min": 90, "normal_max": 250, "poor_high": 350}}
     },
     "Squeeze Max (mmHg)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 50, "normal_min": 80, "normal_max": 250, "poor_high": 350}, "Male": {"poor_low": 70, "normal_min": 110, "normal_max": 300, "poor_high": 400}}
+        "Solid-State HRAM": {
+            "Female": {"normal_min": 45, "normal_max": 250}, 
+            "Male": {"normal_min": 61, "normal_max": 300}
+        },
+        "Water-Perfused": {
+            "Female": {"normal_min": 27, "normal_max": 250}, 
+            "Male": {"normal_min": 36, "normal_max": 300}
+        }
     },
     "Squeeze Duration (sec)": {
         "Solid-State HRAM": {"Female": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}, "Male": {"poor_low": 5, "normal_min": 10, "normal_max": 40, "poor_high": 60}}
@@ -91,13 +105,34 @@ REFERENCE_RANGES = {
         "Solid-State HRAM": {"Female": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}, "Male": {"poor_low": 2, "normal_min": 5, "normal_max": 30, "poor_high": 45}}
     },
     "First Sensation (ml)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 5, "normal_min": 15, "normal_max": 40, "poor_high": 80}, "Male": {"poor_low": 5, "normal_min": 15, "normal_max": 40, "poor_high": 80}}
+        "Solid-State HRAM": {
+            "Female": {"normal_min": 10, "normal_max": 105}, 
+            "Male": {"normal_min": 10, "normal_max": 110}
+        },
+        "Water-Perfused": {
+            "Female": {"normal_min": 10, "normal_max": 105}, 
+            "Male": {"normal_min": 10, "normal_max": 110}
+        }
     },
     "First Urge Volume (ml)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 10, "normal_min": 30, "normal_max": 90, "poor_high": 150}, "Male": {"poor_low": 15, "normal_min": 35, "normal_max": 100, "poor_high": 160}}
+        "Solid-State HRAM": {
+            "Female": {"normal_min": 30, "normal_max": 200}, 
+            "Male": {"normal_min": 40, "normal_max": 190}
+        },
+        "Water-Perfused": {
+            "Female": {"normal_min": 30, "normal_max": 200}, 
+            "Male": {"normal_min": 40, "normal_max": 190}
+        }
     },
     "Max Tolerable (ml)": {
-        "Solid-State HRAM": {"Female": {"poor_low": 50, "normal_min": 100, "normal_max": 250, "poor_high": 400}, "Male": {"poor_low": 60, "normal_min": 110, "normal_max": 280, "poor_high": 450}}
+        "Solid-State HRAM": {
+            "Female": {"normal_min": 65, "normal_max": 285}, 
+            "Male": {"normal_min": 80, "normal_max": 355}
+        },
+        "Water-Perfused": {
+            "Female": {"normal_min": 65, "normal_max": 285}, 
+            "Male": {"normal_min": 80, "normal_max": 355}
+        }
     }
 }
 
@@ -111,7 +146,7 @@ if 'inputs' not in st.session_state:
 # --- DEMOGRAPHICS TOP BAR ---
 col1, col2, col3 = st.columns(3)
 with col1:
-    system = st.selectbox("System Type", ["Solid-State HRAM", "Water-Perfused"])
+    system = st.selectbox("System Type", ["Water-Perfused", "Solid-State HRAM"])
 with col2:
     gender = st.selectbox("Gender", ["Female", "Male"])
 with col3:
@@ -148,7 +183,7 @@ def evaluate_value(field, val, sys, gen):
         elif check_val > ranges.get("poor_high", float('inf')):
             return "🔴 Poor (Critically High)"
         elif check_val > ranges.get("normal_max", float('inf')):
-            return "🔵 High"
+            return "🟡 High"
         else:
             return "🟢 Normal"
     return ""
