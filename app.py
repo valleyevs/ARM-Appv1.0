@@ -1,4 +1,7 @@
 import streamlit as st
+import io
+from docx import Document
+from docx.shared import Inches
 
 # --- COMPLETE REFERENCE RANGES (System & Gender Specific) ---
 REFERENCE_RANGES = {
@@ -167,6 +170,61 @@ st.title("Anorectal Manometry Clinical Tool")
 if 'inputs' not in st.session_state:
     st.session_state.inputs = {}
 
+# --- HELPER: DOCX GENERATOR ---
+def generate_docx_report(summary_lines, inputs_dict, system, gender, indication, bet):
+    doc = Document()
+    
+    # Set to A4 Size
+    sections = doc.sections
+    for section in sections:
+        section.page_width = Inches(8.27)
+        section.page_height = Inches(11.69)
+        
+    doc.add_heading('Anorectal Manometry Clinical Report', 0)
+    
+    # 1. Patient Details Section
+    doc.add_heading('Patient Details', level=1)
+    p = doc.add_paragraph()
+    p.add_run('First Name: ').bold = True
+    p.add_run('____________________\n')
+    p.add_run('Last Name: ').bold = True
+    p.add_run('____________________\n')
+    p.add_run('Unit Number: ').bold = True
+    p.add_run('____________________\n')
+    p.add_run('DOB (DD/MM/YYYY): ').bold = True
+    p.add_run('____________________\n')
+    
+    # 2. Test Details
+    doc.add_heading('Test Information', level=1)
+    doc.add_paragraph(f"Indication: {indication}\nSystem: {system}\nGender: {gender}\nBalloon Expulsion Test: {bet}")
+    
+    # 3. Clinical Summary
+    doc.add_heading('Clinical Summary (London Classification)', level=1)
+    for line in summary_lines:
+        # Strip simple markdown for the Word document
+        clean_text = line.replace('* **', '').replace('**:', ':').replace('*(', '(').replace(')*', ')')
+        doc.add_paragraph(clean_text, style='List Bullet')
+        
+    # 4. Values Table
+    doc.add_heading('Recorded Manometric Values', level=1)
+    table = doc.add_table(rows=1, cols=2)
+    table.style = 'Table Grid'
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Parameter'
+    hdr_cells[1].text = 'Value'
+    
+    for key, val in inputs_dict.items():
+        if val is not None:
+            row_cells = table.add_row().cells
+            row_cells[0].text = str(key)
+            row_cells[1].text = str(val)
+            
+    # Save to buffer
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
 # --- DEMOGRAPHICS TOP BAR ---
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -189,9 +247,7 @@ st.session_state.inputs["Average Anal Canal Length (cm)"] = acl
 def evaluate_value(field, val, sys, gen):
     if val is None:
         return ""
-    
     check_val = val
-
     if field in REFERENCE_RANGES and sys in REFERENCE_RANGES[field]:
         ranges = REFERENCE_RANGES[field][sys].get(gen)
         if not ranges:
@@ -217,7 +273,6 @@ def render_field(field_name):
             n_max = ranges.get("normal_max", "")
             ranges_str = f"Normal: {n_min} - {n_max}"
             
-    # Value defaults to None so 0.0 can be entered explicitly and evaluated
     val = st.number_input(f"{field_name} ({ranges_str})", value=None, step=0.1, key=field_name)
     st.session_state.inputs[field_name] = val
     status = evaluate_value(field_name, val, system, gender)
@@ -265,6 +320,9 @@ with tabs[4]:
         st.write(f"**INDICATION:** {indication} | **SYSTEM:** {system} | **GENDER:** {gender}")
         st.markdown("---")
         
+        # We will collect lines into this list for the DOCX export
+        report_lines = []
+        
         def get_val(field):
             return st.session_state.inputs.get(field, None)
             
@@ -279,11 +337,11 @@ with tabs[4]:
         
         if acl_val is not None and acl_val != 0.0 and acl_limits:
             if acl_val < acl_limits.get("normal_min", 2.3):
-                st.markdown("* **ANAL CANAL LENGTH:** Short.")
+                report_lines.append("* **ANAL CANAL LENGTH:** Short.")
             elif acl_val > acl_limits.get("normal_max", 5.1):
-                st.markdown("* **ANAL CANAL LENGTH:** Long.")
+                report_lines.append("* **ANAL CANAL LENGTH:** Long.")
             else:
-                st.markdown("* **ANAL CANAL LENGTH:** Normal.")
+                report_lines.append("* **ANAL CANAL LENGTH:** Normal.")
 
         # 1. Anal Tone & Contractility
         resting_mean = get_val("Resting Mean (mmHg)")
@@ -305,36 +363,36 @@ with tabs[4]:
         elif is_hypo_contractile:
             tone_diagnosis = "Anal normotension with hypocontractility."
             
-        st.markdown(f"* **TONE & CONTRACTILITY:** {tone_diagnosis}")
+        report_lines.append(f"* **TONE & CONTRACTILITY:** {tone_diagnosis}")
 
         # 2. Endurance
         endurance_dur = get_val("Endurance Duration (sec)")
         endurance_limits = get_limits("Endurance Duration (sec)")
         if endurance_dur is not None and endurance_limits:
             if endurance_dur < endurance_limits.get("normal_min", 20):
-                st.markdown("* **ENDURANCE:** Reduced endurance squeeze time, suggesting early sphincter fatigue.")
+                report_lines.append("* **ENDURANCE:** Reduced endurance squeeze time, suggesting early sphincter fatigue.")
             else:
-                st.markdown("* **ENDURANCE:** Normal sphincter endurance capability.")
+                report_lines.append("* **ENDURANCE:** Normal sphincter endurance capability.")
 
         # 3. Cough Reflex
         cough_max = get_val("Cough Box Max (mmHg)")
         cough_limits = get_limits("Cough Box Max (mmHg)")
         if cough_max is not None and cough_limits:
             if cough_max < cough_limits.get("normal_min", 70):
-                st.markdown("* **COUGH REFLEX:** Absent or impaired. Potential causes include direct sphincter injury or pudendal nerve neuropathy. *(Note: This reflex is typically preserved in spinal cord injuries except in cases of cauda equina lesions.)*")
+                report_lines.append("* **COUGH REFLEX:** Absent or impaired. Potential causes include direct sphincter injury or pudendal nerve neuropathy. *(Note: This reflex is typically preserved in spinal cord injuries except in cases of cauda equina lesions.)*")
             else:
-                st.markdown("* **COUGH REFLEX:** Present and functioning. Normal reflex sphincter contraction upon simulated intra-abdominal pressure increase.")
+                report_lines.append("* **COUGH REFLEX:** Present and functioning. Normal reflex sphincter contraction upon simulated intra-abdominal pressure increase.")
 
         # 4. RAIR
         rair_relax = get_val("RAIR Relaxation (%)")
         rair_limits = get_limits("RAIR Relaxation (%)")
         if rair_relax is not None and rair_limits:
             if rair_relax < 0:
-                st.markdown(f"* **RAIR:** Paradoxical contraction ({rair_relax}% relaxation). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
+                report_lines.append(f"* **RAIR:** Paradoxical contraction ({rair_relax}% relaxation). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
             elif rair_relax < rair_limits.get("normal_min", 25):
-                st.markdown("* **RAIR:** Rectoanal areflexia (Reflex absent or blunted below normal threshold). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
+                report_lines.append("* **RAIR:** Rectoanal areflexia (Reflex absent or blunted below normal threshold). Potential causes include Hirschsprung's disease, acquired myenteric neuropathy, and following rectal surgery.")
             else:
-                st.markdown("* **RAIR:** Present and normal.")
+                report_lines.append("* **RAIR:** Present and normal.")
                 
         # 5. Sensation
         fcsv = get_val("First Sensation (ml)")
@@ -351,14 +409,14 @@ with tabs[4]:
                 if val < limits.get("normal_min", 0): sensory_low_count += 1
                 
         if sensory_high_count >= 2:
-            st.markdown("* **SENSATION:** Rectal hyposensitivity. Suggestive of chronic constipation.")
+            report_lines.append("* **SENSATION:** Rectal hyposensitivity. Suggestive of chronic constipation.")
         elif sensory_high_count == 1:
-            st.markdown("* **SENSATION:** Borderline rectal hyposensitivity. May be associated with chronic constipation.")
+            report_lines.append("* **SENSATION:** Borderline rectal hyposensitivity. May be associated with chronic constipation.")
         elif sensory_low_count >= 1:
-            st.markdown("* **SENSATION:** Rectal hypersensitivity. Potential associated conditions include urge faecal incontinence, radiation proctitis, ulcerative colitis, IBS-D, and Low Anterior Resection Syndrome (LARS).")
+            report_lines.append("* **SENSATION:** Rectal hypersensitivity. Potential associated conditions include urge faecal incontinence, radiation proctitis, ulcerative colitis, IBS-D, and Low Anterior Resection Syndrome (LARS).")
         else:
             if fcsv is not None and ddv is not None and mtv is not None:
-                st.markdown("* **SENSATION:** Normal thresholds for rectal sensation.")
+                report_lines.append("* **SENSATION:** Normal thresholds for rectal sensation.")
                 
         # 6. Coordination
         push_relax = get_val("Push Relaxation (%)")
@@ -387,30 +445,45 @@ with tabs[4]:
 
         if bet == "Prolonged/Abnormal":
             if is_dyssynergic and is_poor_propulsion:
-                st.markdown(f"* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.{dyssynergia_type}")
+                report_lines.append(f"* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.{dyssynergia_type}")
             elif is_dyssynergic:
-                st.markdown(f"* **COORDINATION:** Abnormal expulsion with dyssynergia.{dyssynergia_type}")
+                report_lines.append(f"* **COORDINATION:** Abnormal expulsion with dyssynergia.{dyssynergia_type}")
             elif is_poor_propulsion:
-                st.markdown("* **COORDINATION:** Abnormal expulsion with poor propulsion.")
+                report_lines.append("* **COORDINATION:** Abnormal expulsion with poor propulsion.")
             else:
-                st.markdown("* **COORDINATION:** Abnormal expulsion with normal manometric pattern.")
+                report_lines.append("* **COORDINATION:** Abnormal expulsion with normal manometric pattern.")
         elif bet == "Normal":
             if is_dyssynergic or is_poor_propulsion:
-                st.markdown(f"* **COORDINATION:** Normal expulsion with abnormal manometric pattern.{dyssynergia_type}")
+                report_lines.append(f"* **COORDINATION:** Normal expulsion with abnormal manometric pattern.{dyssynergia_type}")
             else:
-                st.markdown("* **COORDINATION:** Normal manometric pattern with normal expulsion.")
+                report_lines.append("* **COORDINATION:** Normal manometric pattern with normal expulsion.")
         else: # bet == "Not Performed"
             if is_dyssynergic and is_poor_propulsion:
-                st.markdown(f"* **COORDINATION:** Manometric pattern shows poor propulsion and dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+                report_lines.append(f"* **COORDINATION:** Manometric pattern shows poor propulsion and dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
             elif is_dyssynergic:
-                st.markdown(f"* **COORDINATION:** Manometric pattern shows dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+                report_lines.append(f"* **COORDINATION:** Manometric pattern shows dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
             elif is_poor_propulsion:
-                st.markdown("* **COORDINATION:** Manometric pattern shows poor propulsion. *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+                report_lines.append("* **COORDINATION:** Manometric pattern shows poor propulsion. *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
             else:
-                st.markdown("* **COORDINATION:** Normal manometric pattern. *(Balloon Expulsion Test not performed)*")
+                report_lines.append("* **COORDINATION:** Normal manometric pattern. *(Balloon Expulsion Test not performed)*")
                 
         if is_dyssynergic:
-            st.caption("*(Note: Up to 90% of healthy controls without defecation issues can exhibit dyssynergic manometric patterns during testing. Dysnergia requires two or more tests (BET, defecography, transit study; as well as symptoms of constipation).)*")
+            report_lines.append("*(Note: Up to 90% of healthy controls without defecation issues can exhibit dyssynergic manometric patterns during testing. ARM needs to be combined with a history of constipation, BET, Defecography or Transit study.)*")
+
+        # Output to Streamlit App
+        for line in report_lines:
+            st.markdown(line)
+            
+        # Create DOCX and Download Button
+        docx_file = generate_docx_report(report_lines, st.session_state.inputs, system, gender, indication, bet)
+        st.markdown("---")
+        st.download_button(
+            label="📄 Download Report (DOCX)",
+            data=docx_file,
+            file_name="Anorectal_Manometry_Report.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            type="primary"
+        )
 
 # --- REFERENCES TAB ---
 with tabs[5]:
@@ -422,4 +495,4 @@ with tabs[5]:
 
 # --- GLOBAL DISCLAIMER ---
 st.markdown("---")
-st.caption("*(This tool is for aiding with manometry interpretation, but clinical decision making still rests with the a medical professional)*")
+st.caption("*(FOR AID WITH MANOMETRY INTERPRETATION ONLY - LAE)*")
