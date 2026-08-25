@@ -180,21 +180,18 @@ with col3:
         "Biofeedback Training", "Other"
     ])
     
-# Age and Length remain non-negative
+# Age and Length remain non-negative defaults
 age = st.number_input("Age", min_value=0, max_value=120, value=0, step=1)
 acl = st.number_input("Average Anal Canal Length (cm)", min_value=0.0, max_value=10.0, value=0.0, step=0.1)
 st.session_state.inputs["Average Anal Canal Length (cm)"] = acl
 
 # --- HELPER FUNCTIONS ---
 def evaluate_value(field, val, sys, gen):
-    if val == 0.0 or val is None:
+    if val is None:
         return ""
     
-    # Handle negative inputs by taking absolute value for relaxation metrics
-    if "Relaxation" in field or "Residual" in field:
-        check_val = abs(val)
-    else:
-        check_val = val
+    # Removed the absolute value logic here to natively process negative inputs
+    check_val = val
 
     if field in REFERENCE_RANGES and sys in REFERENCE_RANGES[field]:
         ranges = REFERENCE_RANGES[field][sys].get(gen)
@@ -221,8 +218,8 @@ def render_field(field_name):
             n_max = ranges.get("normal_max", "")
             ranges_str = f"Normal: {n_min} - {n_max}"
             
-    # min_value REMOVED to allow negative numbers natively
-    val = st.number_input(f"{field_name} ({ranges_str})", value=0.0, step=0.1, key=field_name)
+    # Value defaults to None so 0.0 can be entered explicitly and evaluated
+    val = st.number_input(f"{field_name} ({ranges_str})", value=None, step=0.1, key=field_name)
     st.session_state.inputs[field_name] = val
     status = evaluate_value(field_name, val, system, gender)
     if status:
@@ -270,8 +267,8 @@ with tabs[4]:
         st.markdown("---")
         
         def get_val(field):
-            val = st.session_state.inputs.get(field, 0.0)
-            return val if val != 0.0 else None
+            # Allows actual 0.0 to be returned instead of assuming None
+            return st.session_state.inputs.get(field, None)
             
         def get_limits(field):
             if field in REFERENCE_RANGES and system in REFERENCE_RANGES[field]:
@@ -322,7 +319,9 @@ with tabs[4]:
         rair_relax = get_val("RAIR Relaxation (%)")
         rair_limits = get_limits("RAIR Relaxation (%)")
         if rair_relax is not None and rair_limits:
-            if abs(rair_relax) < rair_limits.get("normal_min", 25):
+            if rair_relax < 0:
+                st.markdown(f"* **RAIR:** Paradoxical contraction ({rair_relax}% relaxation).")
+            elif rair_relax < rair_limits.get("normal_min", 25):
                 st.markdown("* **RAIR:** Rectoanal areflexia (Reflex absent or blunted below normal threshold).")
             else:
                 st.markdown("* **RAIR:** Present and normal.")
@@ -348,7 +347,7 @@ with tabs[4]:
         elif sensory_low_count >= 1:
             st.markdown("* **SENSATION:** Rectal hypersensitivity.")
         else:
-            if fcsv and ddv and mtv:
+            if fcsv is not None and ddv is not None and mtv is not None:
                 st.markdown("* **SENSATION:** Normal thresholds for rectal sensation.")
                 
         # 6. Coordination
@@ -360,10 +359,7 @@ with tabs[4]:
             rectal_inc = get_val("Rectal Exp. Inc Max (mmHg)")
             rectal_inc_limits = get_limits("Rectal Exp. Inc Max (mmHg)")
             
-            # Use absolute value to interpret relaxation percentage correctly if input as negative
-            if push_relax is not None:
-                push_relax = abs(push_relax)
-
+            # Absolute value override removed here as well to respect negative inputs
             is_dyssynergic = push_relax is not None and push_relax_limits and push_relax < push_relax_limits.get("normal_min", 20)
             is_poor_propulsion = rectal_inc is not None and rectal_inc_limits and rectal_inc < rectal_inc_limits.get("normal_min", 40)
             
