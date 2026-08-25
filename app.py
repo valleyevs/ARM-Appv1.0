@@ -361,50 +361,56 @@ with tabs[4]:
                 st.markdown("* **SENSATION:** Normal thresholds for rectal sensation.")
                 
         # 6. Coordination
-        if bet == "Not Performed":
-            st.markdown("* **COORDINATION:** Inconclusive diagnosis (Balloon Expulsion Test not performed/recorded).")
-        else:
-            push_relax = get_val("Push Relaxation (%)")
-            push_relax_limits = get_limits("Push Relaxation (%)")
-            rectal_inc = get_val("Rectal Exp. Inc Max (mmHg)")
-            rectal_inc_limits = get_limits("Rectal Exp. Inc Max (mmHg)")
+        push_relax = get_val("Push Relaxation (%)")
+        push_relax_limits = get_limits("Push Relaxation (%)")
+        rectal_inc = get_val("Rectal Exp. Inc Max (mmHg)")
+        rectal_inc_limits = get_limits("Rectal Exp. Inc Max (mmHg)")
+        
+        is_dyssynergic = push_relax is not None and push_relax_limits and push_relax < push_relax_limits.get("normal_min", 20)
+        is_poor_propulsion = rectal_inc is not None and rectal_inc_limits and rectal_inc < rectal_inc_limits.get("normal_min", 40)
+        
+        # Determine Dyssynergia Type (I-IV)
+        dyssynergia_type = ""
+        if push_relax is not None and rectal_inc is not None:
+            adequate_push = not is_poor_propulsion
+            paradoxical_contraction = push_relax < 0
+            incomplete_relaxation = 0 <= push_relax < push_relax_limits.get("normal_min", 20)
             
-            is_dyssynergic = push_relax is not None and push_relax_limits and push_relax < push_relax_limits.get("normal_min", 20)
-            is_poor_propulsion = rectal_inc is not None and rectal_inc_limits and rectal_inc < rectal_inc_limits.get("normal_min", 40)
-            
-            # Determine Dyssynergia Type (I-IV)
-            dyssynergia_type = ""
-            if push_relax is not None and rectal_inc is not None:
-                adequate_push = not is_poor_propulsion
-                paradoxical_contraction = push_relax < 0
-                incomplete_relaxation = 0 <= push_relax < push_relax_limits.get("normal_min", 20)
-                
-                if adequate_push and paradoxical_contraction:
-                    dyssynergia_type = " - **Type I Dyssynergia** (Adequate rectal push pressures with paradoxical anal contraction)"
-                elif not adequate_push and paradoxical_contraction:
-                    dyssynergia_type = " - **Type II Dyssynergia** (Inadequate rectal push pressures with paradoxical anal contraction)"
-                elif adequate_push and incomplete_relaxation:
-                    dyssynergia_type = " - **Type III Dyssynergia** (Adequate rectal push with absent/incomplete sphincter relaxation)"
-                elif not adequate_push and incomplete_relaxation:
-                    dyssynergia_type = " - **Type IV Dyssynergia** (Inadequate rectal push with absent/incomplete sphincter relaxation)"
+            if adequate_push and paradoxical_contraction:
+                dyssynergia_type = " - **Type I Dyssynergia pattern** (Adequate rectal push pressures with paradoxical anal contraction)"
+            elif not adequate_push and paradoxical_contraction:
+                dyssynergia_type = " - **Type II Dyssynergia pattern** (Inadequate rectal push pressures with paradoxical anal contraction)"
+            elif adequate_push and incomplete_relaxation:
+                dyssynergia_type = " - **Type III Dyssynergia pattern** (Adequate rectal push with absent/incomplete sphincter relaxation)"
+            elif not adequate_push and incomplete_relaxation:
+                dyssynergia_type = " - **Type IV Dyssynergia pattern** (Inadequate rectal push with absent/incomplete sphincter relaxation)"
 
-            if bet == "Prolonged/Abnormal":
-                if is_dyssynergic and is_poor_propulsion:
-                    st.markdown(f"* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.{dyssynergia_type}")
-                elif is_dyssynergic:
-                    st.markdown(f"* **COORDINATION:** Abnormal expulsion with dyssynergia.{dyssynergia_type}")
-                elif is_poor_propulsion:
-                    st.markdown("* **COORDINATION:** Abnormal expulsion with poor propulsion.")
-                else:
-                    st.markdown("* **COORDINATION:** Abnormal expulsion with normal manometric pattern.")
-            elif bet == "Normal":
-                if is_dyssynergic or is_poor_propulsion:
-                    st.markdown(f"* **COORDINATION:** Normal expulsion with abnormal manometric pattern.{dyssynergia_type}")
-                else:
-                    st.markdown("* **COORDINATION:** Normal manometric pattern with normal expulsion.")
-            
-            if is_dyssynergic:
-                st.caption("*(Note: Up to 90% of healthy controls without defecation issues can exhibit dyssynergic manometric patterns during testing.)*")
+        if bet == "Prolonged/Abnormal":
+            if is_dyssynergic and is_poor_propulsion:
+                st.markdown(f"* **COORDINATION:** Abnormal expulsion with poor propulsion and dyssynergia.{dyssynergia_type}")
+            elif is_dyssynergic:
+                st.markdown(f"* **COORDINATION:** Abnormal expulsion with dyssynergia.{dyssynergia_type}")
+            elif is_poor_propulsion:
+                st.markdown("* **COORDINATION:** Abnormal expulsion with poor propulsion.")
+            else:
+                st.markdown("* **COORDINATION:** Abnormal expulsion with normal manometric pattern.")
+        elif bet == "Normal":
+            if is_dyssynergic or is_poor_propulsion:
+                st.markdown(f"* **COORDINATION:** Normal expulsion with abnormal manometric pattern.{dyssynergia_type}")
+            else:
+                st.markdown("* **COORDINATION:** Normal manometric pattern with normal expulsion.")
+        else: # bet == "Not Performed"
+            if is_dyssynergic and is_poor_propulsion:
+                st.markdown(f"* **COORDINATION:** Manometric pattern shows poor propulsion and dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+            elif is_dyssynergic:
+                st.markdown(f"* **COORDINATION:** Manometric pattern shows dyssynergia.{dyssynergia_type} *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+            elif is_poor_propulsion:
+                st.markdown("* **COORDINATION:** Manometric pattern shows poor propulsion. *(Inconclusive diagnosis as Balloon Expulsion Test not performed)*")
+            else:
+                st.markdown("* **COORDINATION:** Normal manometric pattern. *(Balloon Expulsion Test not performed)*")
+                
+        if is_dyssynergic:
+            st.caption("*(Note: Up to 90% of healthy controls without defecation issues can exhibit dyssynergic manometric patterns during testing. Dysnergia requires two or more tests (BET, defecography, transit study; as well as symptoms of constipation).)*")
 
 # --- REFERENCES TAB ---
 with tabs[5]:
@@ -416,4 +422,4 @@ with tabs[5]:
 
 # --- GLOBAL DISCLAIMER ---
 st.markdown("---")
-st.caption("*(This is simply a tool to display what is abnormal on manometry reports and clinical decision making rests with the physician interpreting it)*")
+st.caption("*(This tool is for aiding with manometry interpretation, but clinical decision making still rests with the a medical professional)*")
